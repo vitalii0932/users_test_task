@@ -110,4 +110,13 @@ public class UserService {
             throw new IllegalArgumentException("I'm sorry, but you're too young");
         }
     }
+
+    /**
+     * delete user by his id
+     *
+     * @param id - user id
+     */
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
 }
