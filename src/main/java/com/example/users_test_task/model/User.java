@@ -1,9 +1,6 @@
 package com.example.users_test_task.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import jakarta.validation.constraints.Email;
@@ -25,6 +22,7 @@ public class User {
 
     @NotEmpty(message = "Email is required")
     @Email(message = "Email should be valid")
+    @Column(unique = true)
     private String email;
 
     @NotEmpty(message = "First name is required")
