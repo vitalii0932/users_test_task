@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * user entity class
@@ -32,7 +32,7 @@ public class User {
     private String lastName;
 
     @Past(message = "Date of birth should be in the past")
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
 
     private String address;
 
