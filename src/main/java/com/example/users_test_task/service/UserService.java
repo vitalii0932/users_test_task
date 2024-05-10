@@ -5,8 +5,10 @@ import com.example.users_test_task.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.LinkedHashMap;
 
 /**
  * service for working with user entities and db
@@ -30,12 +32,44 @@ public class UserService {
     }
 
     /**
+     * update some fields in user entity
+     *
+     * @param fields - fields to update
+     * @return updated user entity from db
+     * @throws IllegalArgumentException if something is wrong
+     */
+    public User updateFields(LinkedHashMap<String, Object> fields) throws IllegalArgumentException {
+        if (!fields.containsKey("id") && !fields.keySet().toArray()[0].equals("id")) {
+            throw new IllegalArgumentException("Incorrect input data. The input data must have id. And id must to be in the first place");
+        }
+
+        var user = userRepository.findById((Long) fields.get("id")).orElseThrow(
+                () -> new IllegalArgumentException("No user with this ID found")
+        );
+
+        for (var field : fields.keySet()) {
+            if (field.equals("id")) {
+                continue;
+            }
+            try {
+                Field declaredField = user.getClass().getDeclaredField(field);
+                declaredField.setAccessible(true);
+                declaredField.set(user, fields.get(field));
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IllegalArgumentException("Incorrect field: " + field);
+            }
+        }
+
+        return userRepository.save(user);
+    }
+
+    /**
      * update user in db
      *
      * @param updatedUser - user data to update
      * @throws IllegalArgumentException if something is wrong
      */
-    public void update(User updatedUser) throws IllegalArgumentException {
+    public User update(User updatedUser) throws IllegalArgumentException {
         var user = userRepository.findById(updatedUser.getId()).orElseThrow(
                 () -> new IllegalArgumentException("User not found exception")
         );
@@ -50,7 +84,7 @@ public class UserService {
         user.setAddress(updatedUser.getAddress());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
 
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     /**
