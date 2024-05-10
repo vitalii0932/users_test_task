@@ -28,10 +28,11 @@ public class User {
     private String lastName;
 
     @Past(message = "Date of birth should be in the past")
+    @NotNull(message = "Date of birth is required")
     private LocalDate dateOfBirth;
 
     private String address;
 
-    @Pattern(regexp="[0-9]+", message="Phone number should contain only digits")
+    @Pattern(regexp="^(?:.{0}|\\d{10})$", message="Phone number should be empty or contain exactly 5 digits")
     private String phoneNumber;
 }

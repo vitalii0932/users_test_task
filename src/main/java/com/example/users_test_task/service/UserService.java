@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * service for working with user entities and db
@@ -35,6 +36,8 @@ public class UserService {
     public User save(User user) throws IllegalArgumentException, ValidationException {
         if (validationService.isValidUser(user)) {
             isAgeValid(user.getDateOfBirth());
+            isEmailNotExist(user.getEmail());
+            isDataIsValid(user.getDateOfBirth());
             return userRepository.save(user);
         }
         return null;
@@ -50,11 +53,7 @@ public class UserService {
      */
     public User save(UserDTO userDTO) throws IllegalArgumentException, ValidationException {
         var user = userMapper.toUser(userDTO);
-        if (validationService.isValidUser(user)) {
-            isAgeValid(user.getDateOfBirth());
-            return userRepository.save(user);
-        }
-        return null;
+        return save(user);
     }
 
     /**
@@ -70,7 +69,7 @@ public class UserService {
             throw new IllegalArgumentException("Incorrect input data. The input data must have id. And id must to be in the first place");
         }
 
-        var user = userRepository.findById((Long) fields.get("id")).orElseThrow(
+        var user = userRepository.findById(Long.valueOf((Integer) fields.get("id"))).orElseThrow(
                 () -> new IllegalArgumentException("No user with this ID found")
         );
 
@@ -119,8 +118,32 @@ public class UserService {
      * @throws IllegalArgumentException if something is wrong
      */
     private void isAgeValid(LocalDate dateOfBirth) throws IllegalArgumentException {
-        if (Period.between(LocalDate.now(), dateOfBirth).getYears() < 18) {
+        if (Period.between(dateOfBirth, LocalDate.now()).getYears() < 18) {
             throw new IllegalArgumentException("I'm sorry, but you're too young");
+        }
+    }
+
+    /**
+     * check does email is not exist
+     *
+     * @param email - email
+     * @throws IllegalArgumentException if something is wrong
+     */
+    private void isEmailNotExist(String email) {
+        if (userRepository.findUserByEmail(email).isPresent()) {
+            throw new IllegalArgumentException("This email is already used");
+        }
+    }
+
+    /**
+     * check does date is valid
+     *
+     * @param date - date
+     * @throws IllegalArgumentException is something wrong
+     */
+    private void isDataIsValid(LocalDate date) throws IllegalArgumentException {
+        if (date.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("The date cannot be the future");
         }
     }
 
@@ -135,5 +158,23 @@ public class UserService {
             throw new RuntimeException("User with this id doesnt exist");
         }
         userRepository.deleteById(id);
+    }
+
+    /**
+     * get users by date of birth from @param from to @param to
+     *
+     * @param from - from date
+     * @param to - to date
+     * @return a list of users
+     * @throws IllegalArgumentException if dates dont valid
+     */
+    public List<User> getUsersByDates(LocalDate from, LocalDate to) throws IllegalArgumentException {
+        isDataIsValid(from);
+        isDataIsValid(to);
+        
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("Start date cannot be after end date");
+        }
+        return userRepository.getUsersByDateOfBirthBetween(from, to);
     }
 }
