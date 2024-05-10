@@ -1,6 +1,8 @@
 package com.example.users_test_task.service;
 
+import com.example.users_test_task.dto.UserDTO;
 import com.example.users_test_task.exception.ValidationException;
+import com.example.users_test_task.mapper.UserMapper;
 import com.example.users_test_task.model.User;
 import com.example.users_test_task.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * service for working with user entities and db
@@ -19,20 +22,38 @@ import java.util.LinkedHashMap;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final ValidationService validationService;
 
     /**
      * save user in db
      *
-     * @param user - user model
+     * @param user - user entity
      * @return - saved user entity
+     * @throws IllegalArgumentException if something is wrong
+     * @throws ValidationException if something is wrong on validation
      */
     public User save(User user) throws IllegalArgumentException, ValidationException {
         if (validationService.isValidUser(user)) {
             isAgeValid(user.getDateOfBirth());
+            isEmailNotExist(user.getEmail());
+            isDataIsValid(user.getDateOfBirth());
             return userRepository.save(user);
         }
         return null;
+    }
+
+    /**
+     * save user in db
+     *
+     * @param userDTO - user data
+     * @return - saved user entity
+     * @throws IllegalArgumentException if something is wrong
+     * @throws ValidationException if something is wrong on validation
+     */
+    public User save(UserDTO userDTO) throws IllegalArgumentException, ValidationException {
+        var user = userMapper.toUser(userDTO);
+        return save(user);
     }
 
     /**
@@ -41,13 +62,14 @@ public class UserService {
      * @param fields - fields to update
      * @return updated user entity from db
      * @throws IllegalArgumentException if something is wrong
+     * @throws ValidationException if something is wrong on validation
      */
     public User updateFields(LinkedHashMap<String, Object> fields) throws IllegalArgumentException, ValidationException {
         if (!fields.containsKey("id") && !fields.keySet().toArray()[0].equals("id")) {
             throw new IllegalArgumentException("Incorrect input data. The input data must have id. And id must to be in the first place");
         }
 
-        var user = userRepository.findById((Long) fields.get("id")).orElseThrow(
+        var user = userRepository.findById(Long.valueOf((Integer) fields.get("id"))).orElseThrow(
                 () -> new IllegalArgumentException("No user with this ID found")
         );
 
@@ -70,20 +92,21 @@ public class UserService {
     /**
      * update user in db
      *
-     * @param updatedUser - user data to update
+     * @param updatedUserDTO - user data to update
      * @throws IllegalArgumentException if something is wrong
+     * @throws ValidationException if something is wrong on validation
      */
-    public User update(User updatedUser) throws IllegalArgumentException, ValidationException {
-        var user = userRepository.findById(updatedUser.getId()).orElseThrow(
+    public User update(UserDTO updatedUserDTO) throws IllegalArgumentException, ValidationException {
+        var user = userRepository.findById(updatedUserDTO.getId()).orElseThrow(
                 () -> new IllegalArgumentException("User not found exception")
         );
 
-        user.setEmail(updatedUser.getEmail());
-        user.setFirstName(updatedUser.getFirstName());
-        user.setLastName(updatedUser.getLastName());
-        user.setDateOfBirth(updatedUser.getDateOfBirth());
-        user.setAddress(updatedUser.getAddress());
-        user.setPhoneNumber(updatedUser.getPhoneNumber());
+        user.setEmail(updatedUserDTO.getEmail());
+        user.setFirstName(updatedUserDTO.getFirstName());
+        user.setLastName(updatedUserDTO.getLastName());
+        user.setDateOfBirth(updatedUserDTO.getDateOfBirth());
+        user.setAddress(updatedUserDTO.getAddress());
+        user.setPhoneNumber(updatedUserDTO.getPhoneNumber());
 
         return save(user);
     }
@@ -95,8 +118,32 @@ public class UserService {
      * @throws IllegalArgumentException if something is wrong
      */
     private void isAgeValid(LocalDate dateOfBirth) throws IllegalArgumentException {
-        if (Period.between(LocalDate.now(), dateOfBirth).getYears() < 18) {
+        if (Period.between(dateOfBirth, LocalDate.now()).getYears() < 18) {
             throw new IllegalArgumentException("I'm sorry, but you're too young");
+        }
+    }
+
+    /**
+     * check does email is not exist
+     *
+     * @param email - email
+     * @throws IllegalArgumentException if something is wrong
+     */
+    private void isEmailNotExist(String email) {
+        if (userRepository.findUserByEmail(email).isPresent()) {
+            throw new IllegalArgumentException("This email is already used");
+        }
+    }
+
+    /**
+     * check does date is valid
+     *
+     * @param date - date
+     * @throws IllegalArgumentException is something wrong
+     */
+    private void isDataIsValid(LocalDate date) throws IllegalArgumentException {
+        if (date.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("The date cannot be the future");
         }
     }
 
@@ -104,8 +151,30 @@ public class UserService {
      * delete user by his id
      *
      * @param id - user id
+     * @throws RuntimeException if something is wrong
      */
-    public void delete(Long id) {
+    public void delete(Long id) throws RuntimeException {
+        if (userRepository.findById(id).isEmpty()) {
+            throw new RuntimeException("User with this id doesnt exist");
+        }
         userRepository.deleteById(id);
+    }
+
+    /**
+     * get users by date of birth from @param from to @param to
+     *
+     * @param from - from date
+     * @param to - to date
+     * @return a list of users
+     * @throws IllegalArgumentException if dates dont valid
+     */
+    public List<User> getUsersByDates(LocalDate from, LocalDate to) throws IllegalArgumentException {
+        isDataIsValid(from);
+        isDataIsValid(to);
+        
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("Start date cannot be after end date");
+        }
+        return userRepository.getUsersByDateOfBirthBetween(from, to);
     }
 }
