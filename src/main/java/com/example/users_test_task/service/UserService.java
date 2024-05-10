@@ -1,6 +1,8 @@
 package com.example.users_test_task.service;
 
+import com.example.users_test_task.dto.UserDTO;
 import com.example.users_test_task.exception.ValidationException;
+import com.example.users_test_task.mapper.UserMapper;
 import com.example.users_test_task.model.User;
 import com.example.users_test_task.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +21,35 @@ import java.util.LinkedHashMap;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final ValidationService validationService;
 
     /**
      * save user in db
      *
-     * @param user - user model
+     * @param user - user entity
      * @return - saved user entity
+     * @throws IllegalArgumentException if something is wrong
+     * @throws ValidationException if something is wrong on validation
      */
     public User save(User user) throws IllegalArgumentException, ValidationException {
+        if (validationService.isValidUser(user)) {
+            isAgeValid(user.getDateOfBirth());
+            return userRepository.save(user);
+        }
+        return null;
+    }
+
+    /**
+     * save user in db
+     *
+     * @param userDTO - user data
+     * @return - saved user entity
+     * @throws IllegalArgumentException if something is wrong
+     * @throws ValidationException if something is wrong on validation
+     */
+    public User save(UserDTO userDTO) throws IllegalArgumentException, ValidationException {
+        var user = userMapper.toUser(userDTO);
         if (validationService.isValidUser(user)) {
             isAgeValid(user.getDateOfBirth());
             return userRepository.save(user);
@@ -41,6 +63,7 @@ public class UserService {
      * @param fields - fields to update
      * @return updated user entity from db
      * @throws IllegalArgumentException if something is wrong
+     * @throws ValidationException if something is wrong on validation
      */
     public User updateFields(LinkedHashMap<String, Object> fields) throws IllegalArgumentException, ValidationException {
         if (!fields.containsKey("id") && !fields.keySet().toArray()[0].equals("id")) {
@@ -70,20 +93,21 @@ public class UserService {
     /**
      * update user in db
      *
-     * @param updatedUser - user data to update
+     * @param updatedUserDTO - user data to update
      * @throws IllegalArgumentException if something is wrong
+     * @throws ValidationException if something is wrong on validation
      */
-    public User update(User updatedUser) throws IllegalArgumentException, ValidationException {
-        var user = userRepository.findById(updatedUser.getId()).orElseThrow(
+    public User update(UserDTO updatedUserDTO) throws IllegalArgumentException, ValidationException {
+        var user = userRepository.findById(updatedUserDTO.getId()).orElseThrow(
                 () -> new IllegalArgumentException("User not found exception")
         );
 
-        user.setEmail(updatedUser.getEmail());
-        user.setFirstName(updatedUser.getFirstName());
-        user.setLastName(updatedUser.getLastName());
-        user.setDateOfBirth(updatedUser.getDateOfBirth());
-        user.setAddress(updatedUser.getAddress());
-        user.setPhoneNumber(updatedUser.getPhoneNumber());
+        user.setEmail(updatedUserDTO.getEmail());
+        user.setFirstName(updatedUserDTO.getFirstName());
+        user.setLastName(updatedUserDTO.getLastName());
+        user.setDateOfBirth(updatedUserDTO.getDateOfBirth());
+        user.setAddress(updatedUserDTO.getAddress());
+        user.setPhoneNumber(updatedUserDTO.getPhoneNumber());
 
         return save(user);
     }
@@ -104,8 +128,12 @@ public class UserService {
      * delete user by his id
      *
      * @param id - user id
+     * @throws RuntimeException if something is wrong
      */
-    public void delete(Long id) {
+    public void delete(Long id) throws RuntimeException {
+        if (userRepository.findById(id).isEmpty()) {
+            throw new RuntimeException("User with this id doesnt exist");
+        }
         userRepository.deleteById(id);
     }
 }
