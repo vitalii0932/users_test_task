@@ -6,8 +6,10 @@ import com.example.users_test_task.mapper.UserMapper;
 import com.example.users_test_task.model.User;
 import com.example.users_test_task.repository.UserRepository;
 import com.example.users_test_task.service.UserService;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -232,5 +234,140 @@ public class UserServiceTests {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * isAgeValid function test
+     *
+     * @param date - date
+     * @param expectedResult - valid or not
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "2000-01-01, true",
+            "2020-01-01, false",
+            ", false"
+    })
+    public void isAgeValidTest(LocalDate date, Boolean expectedResult) {
+        try {
+            userService.isAgeValid(date);
+        } catch (IllegalArgumentException e) {
+            if (expectedResult) {
+                System.out.printf("Error in case: %s - %s", date, expectedResult);
+                assert (false);
+            }
+            e.printStackTrace();
+        }
+    }
+
+    @Transactional
+    @ParameterizedTest
+    @CsvSource({
+            "test_user_new@gmail.com, true",
+            "test_user@gmail.com, false",
+            ", false"
+    })
+    public void isEmailNotExistTest(String email, Boolean expectedResult) {
+        var testUser = new User();
+
+        testUser.setEmail("test_user@gmail.com");
+        testUser.setFirstName("test");
+        testUser.setLastName("user");
+        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
+
+        testUser = userRepository.save(testUser);
+
+        try {
+            userService.isEmailNotExist(email);
+        } catch (IllegalArgumentException e) {
+            if (expectedResult) {
+                System.out.printf("Error in case: %s - %s", email, expectedResult);
+                assert (false);
+            }
+            e.printStackTrace();
+        }
+
+        userRepository.delete(testUser);
+    }
+
+    /**
+     * isDataValid function test
+     *
+     * @param date - date
+     * @param expectedResult - valid or not
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "2000-01-01, true",
+            "2026-01-01, false",
+            ", false"
+    })
+    public void isDataValidTest(LocalDate date, Boolean expectedResult) {
+        try {
+            userService.isDataValid(date);
+        } catch (IllegalArgumentException e) {
+            if (expectedResult) {
+                System.out.printf("Error in case: %s - %s", date, expectedResult);
+                assert (false);
+            }
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * delete function test
+     */
+    @Test
+    public void deleteTest() {
+        var testUser = new User();
+
+        testUser.setEmail("test_user@gmail.com");
+        testUser.setFirstName("test");
+        testUser.setLastName("user");
+        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
+
+        testUser = userRepository.save(testUser);
+
+        userService.delete(testUser.getId());
+
+        assert (userRepository.findUserByEmail(testUser.getEmail()).isEmpty());
+    }
+
+    /**
+     * getUsersByDates function test
+     *
+     * @param from - from date
+     * @param to - to date
+     * @param expectedResult - expected result
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "1999-01-01, 2020-01-01, true",
+            "2001-01-01, 2020-01-01, false",
+            "2020-01-01, 2000-01-01, false"
+    })
+    public void getUsersByDatesTest(LocalDate from, LocalDate to, Boolean expectedResult) {
+        var testUser = new User();
+
+        testUser.setEmail("test_user@gmail.com");
+        testUser.setFirstName("test");
+        testUser.setLastName("user");
+        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
+
+        testUser = userRepository.save(testUser);
+
+        try {
+            var result = userService.getUsersByDates(from, to);
+
+            assert (expectedResult != result.isEmpty());
+        } catch (IllegalArgumentException e) {
+            if (expectedResult) {
+                System.out.printf("Error in case: %s - %s - %s", from, to, expectedResult);
+                assert (false);
+            }
+            e.printStackTrace();
+        }
+
+        userRepository.delete(testUser);
     }
 }

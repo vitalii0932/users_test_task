@@ -44,7 +44,7 @@ public class UserService {
         validationService.isValidUser(user);
         isAgeValid(user.getDateOfBirth());
         isEmailNotExist(user.getEmail());
-        isDataIsValid(user.getDateOfBirth());
+        isDataValid(user.getDateOfBirth());
         return userRepository.save(user);
     }
 
@@ -99,7 +99,7 @@ public class UserService {
 
         validationService.isValidUser(user);
         isAgeValid(user.getDateOfBirth());
-        isDataIsValid(user.getDateOfBirth());
+        isDataValid(user.getDateOfBirth());
 
         return userRepository.save(user);
     }
@@ -129,7 +129,7 @@ public class UserService {
 
         validationService.isValidUser(user);
         isAgeValid(user.getDateOfBirth());
-        isDataIsValid(user.getDateOfBirth());
+        isDataValid(user.getDateOfBirth());
 
         return userRepository.save(user);
     }
@@ -140,8 +140,8 @@ public class UserService {
      * @param dateOfBirth - date of birth
      * @throws IllegalArgumentException if something is wrong
      */
-    private void isAgeValid(LocalDate dateOfBirth) throws IllegalArgumentException {
-        if (Period.between(dateOfBirth, LocalDate.now()).getYears() < 18) {
+    public void isAgeValid(LocalDate dateOfBirth) throws IllegalArgumentException {
+        if (dateOfBirth != null && Period.between(dateOfBirth, LocalDate.now()).getYears() < 18) {
             throw new IllegalArgumentException("I'm sorry, but you're too young");
         }
     }
@@ -154,7 +154,7 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public void isEmailNotExist(String email) {
-        if (userRepository.findUserByEmail(email).isPresent()) {
+        if (email != null && !email.isEmpty() && userRepository.findUserByEmail(email).isPresent()) {
             throw new IllegalArgumentException("This email is already used");
         }
     }
@@ -165,8 +165,8 @@ public class UserService {
      * @param date - date
      * @throws IllegalArgumentException is something wrong
      */
-    private void isDataIsValid(LocalDate date) throws IllegalArgumentException {
-        if (date.isAfter(LocalDate.now())) {
+    public void isDataValid(LocalDate date) throws IllegalArgumentException {
+        if (date != null && date.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("The date cannot be the future");
         }
     }
@@ -196,8 +196,8 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public List<User> getUsersByDates(LocalDate from, LocalDate to) throws IllegalArgumentException {
-        isDataIsValid(from);
-        isDataIsValid(to);
+        isDataValid(from);
+        isDataValid(to);
         
         if (from.isAfter(to)) {
             throw new IllegalArgumentException("Start date cannot be after end date");
