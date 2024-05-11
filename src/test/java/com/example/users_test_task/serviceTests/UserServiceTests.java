@@ -1,4 +1,4 @@
-package com.example.users_test_task.repositoryTests;
+package com.example.users_test_task.serviceTests;
 
 import com.example.users_test_task.dto.UserDTO;
 import com.example.users_test_task.exception.ValidationException;
@@ -6,9 +6,6 @@ import com.example.users_test_task.mapper.UserMapper;
 import com.example.users_test_task.model.User;
 import com.example.users_test_task.repository.UserRepository;
 import com.example.users_test_task.service.UserService;
-import org.checkerframework.checker.units.qual.C;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
