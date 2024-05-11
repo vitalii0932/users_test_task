@@ -1,6 +1,8 @@
 package com.example.users_test_task.repositoryTests;
 
+import com.example.users_test_task.dto.UserDTO;
 import com.example.users_test_task.exception.ValidationException;
+import com.example.users_test_task.mapper.UserMapper;
 import com.example.users_test_task.model.User;
 import com.example.users_test_task.repository.UserRepository;
 import com.example.users_test_task.service.UserService;
@@ -31,6 +33,9 @@ public class UserServiceTests {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * saveUser function test
@@ -161,5 +166,71 @@ public class UserServiceTests {
             map.put(data[i], i + 1 < data.length ? data[i + 1] : null);
         }
         return map;
+    }
+
+    /**
+     * update function test
+     *
+     * @param email - user email
+     * @param firstName - user first name
+     * @param lastName - user last name
+     * @param dateOfBirth - user DoB
+     * @param address - user address
+     * @param phoneNumber - user phone number
+     * @param expectedResult - user saved or not
+     */
+    @Transactional
+    @ParameterizedTest
+    @CsvSource({
+            "test_user1@gmail.com, test, user, 2000-01-01, address, 1234567890, true",
+            "test_user1@gmail.com, test, user, 2000-01-01, , 1234567890, true",
+            "test_user1@gmail.com, test, user, 2000-01-01, address, , true",
+            "test_user@gmail.com, test, user, 2000-01-01, address, 1234567890, false",
+            "test_user, test, user, 2000-01-01, address, 1234567890, false",
+            "test_user1@gmail.com, , user, 2000-01-01, address, 1234567890, false",
+            "test_user1@gmail.com, test, , 2000-01-01, address, 1234567890, false",
+            "test_user1@gmail.com, test, user, 2025-01-01, address, 1234567890, false",
+            "test_user1@gmail.com, test, user, 2007-01-01, address, 1234567890, false"
+    })
+    public void updateTest(String email, String firstName, String lastName, LocalDate dateOfBirth, String address, String phoneNumber, Boolean expectedResult) {
+        var testUser = new User();
+
+        testUser.setEmail("test_user@gmail.com");
+        testUser.setFirstName("test");
+        testUser.setLastName("user");
+        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
+
+        testUser = userRepository.save(testUser);
+
+        var user = new UserDTO();
+        user.setId(testUser.getId());
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setDateOfBirth(dateOfBirth);
+        user.setAddress(address);
+        user.setPhoneNumber(phoneNumber);
+
+        try {
+            var updatedUser = userService.update(user);
+
+            assert (updatedUser.equals(
+                    userMapper.toUser(user)
+            ));
+
+            userRepository.delete(userRepository.findUserByEmail(email).get());
+        } catch (Exception e) {
+            userRepository.delete(testUser);
+            if (expectedResult) {
+                System.out.printf("Error in case: %s - %s - %s - %s - %s - %s",
+                        email, firstName, lastName, dateOfBirth.toString(), address, phoneNumber);
+                assert (false);
+            }
+            if (e.getClass().equals(ValidationException.class)) {
+                System.out.println(((ValidationException) e).getViolations());
+            } else {
+                e.printStackTrace();
+            }
+        }
     }
 }
