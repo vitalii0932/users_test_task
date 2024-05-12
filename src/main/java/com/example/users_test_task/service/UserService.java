@@ -115,6 +115,7 @@ public class UserService {
         user.setAddress(updatedUserDTO.getAddress());
         user.setPhoneNumber(updatedUserDTO.getPhoneNumber());
 
+        isEmailNotExist(user.getEmail());
         validationService.isValidUser(user);
         isAgeValid(user.getDateOfBirth());
         isDataValid(user.getDateOfBirth());
