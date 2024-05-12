@@ -44,7 +44,6 @@ public class UserService {
         validationService.isValidUser(user);
         isAgeValid(user.getDateOfBirth());
         isEmailNotExist(user.getEmail());
-        isDataValid(user.getDateOfBirth());
         return userRepository.save(user);
     }
 
@@ -63,9 +62,12 @@ public class UserService {
             throw new IllegalArgumentException("Error. Incorrect input data. The input data must have id. And id must to be in the first place");
         }
 
-        var user = userRepository.findById(Long.valueOf((Integer) fields.get("id"))).orElseThrow(
+        var userToUpdate = userRepository.findById(Long.valueOf((Integer) fields.get("id"))).orElseThrow(
                 () -> new IllegalArgumentException("Error. No user with this ID found")
         );
+
+        var user = new User();
+        user.copy(userToUpdate);
 
         isEmailNotExist((String) fields.get("email"));
 
@@ -98,12 +100,13 @@ public class UserService {
      */
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Retryable(maxAttempts = 5)
-    public User update(UserDTO updatedUserDTO) throws IllegalArgumentException, ValidationException {
-        var user = userRepository.findById(updatedUserDTO.getId()).orElseThrow(
+    public User update(UserDTO updatedUserDTO) throws Exception{
+        var userToUpdate = userRepository.findById(updatedUserDTO.getId()).orElseThrow(
                 () -> new IllegalArgumentException("User not found exception")
         );
 
-        isEmailNotExist(updatedUserDTO.getEmail());
+        var user = new User();
+        user.copy(userToUpdate);
 
         user.setEmail(updatedUserDTO.getEmail());
         user.setFirstName(updatedUserDTO.getFirstName());

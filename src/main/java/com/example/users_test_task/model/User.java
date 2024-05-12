@@ -34,6 +34,15 @@ public class User {
     private String address;
 
     @Pattern(regexp="^(?:.{0}|\\d{10})$", message="Error. Phone number should be empty or contain exactly 10 digits")
-    @Nullable
     private String phoneNumber;
+
+    public void copy(User user) {
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.dateOfBirth = user.getDateOfBirth();
+        this.address = user.getAddress();
+        this.phoneNumber = user.getPhoneNumber();
+    }
 }

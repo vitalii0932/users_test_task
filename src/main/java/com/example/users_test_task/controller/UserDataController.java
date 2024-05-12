@@ -67,6 +67,10 @@ public class UserDataController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getViolations());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+
         }
     }
 
