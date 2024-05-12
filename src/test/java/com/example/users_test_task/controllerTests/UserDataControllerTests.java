@@ -284,6 +284,9 @@ public class UserDataControllerTests {
         deleteTestUser();
     }
 
+    /**
+     * set up the test user
+     */
     private void setUpTestUser() {
         testUser = new User();
 
@@ -295,6 +298,9 @@ public class UserDataControllerTests {
         testUser = userRepository.save(testUser);
     }
 
+    /**
+     * remove the test user from db
+     */
     private void deleteTestUser() {
         userRepository.delete(testUser);
     }

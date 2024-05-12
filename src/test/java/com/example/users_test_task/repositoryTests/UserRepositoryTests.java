@@ -62,8 +62,8 @@ public class UserRepositoryTests {
     /**
      * getUsersByDateOfBirthBetween function test
      *
-     * @param from - from date
-     * @param to - to date
+     * @param from           - from date
+     * @param to             - to date
      * @param expectedResult - user found or not
      */
     @ParameterizedTest

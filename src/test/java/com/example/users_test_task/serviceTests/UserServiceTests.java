@@ -36,15 +36,17 @@ public class UserServiceTests {
     @Autowired
     private UserMapper userMapper;
 
+    private User testUser;
+
     /**
      * saveUser function test
      *
-     * @param email - user email
-     * @param firstName - user first name
-     * @param lastName - user last name
-     * @param dateOfBirth - user DoB
-     * @param address - user address
-     * @param phoneNumber - user phone number
+     * @param email          - user email
+     * @param firstName      - user first name
+     * @param lastName       - user last name
+     * @param dateOfBirth    - user DoB
+     * @param address        - user address
+     * @param phoneNumber    - user phone number
      * @param expectedResult - user saved or not
      */
     @Transactional
@@ -59,7 +61,7 @@ public class UserServiceTests {
             "test_user@gmail.com, test, user, 2025-01-01, address, 1234567890, false",
             "test_user@gmail.com, test, user, 2007-01-01, address, 1234567890, false"
     })
-    public void saveUserTest(String email, String firstName, String lastName, LocalDate dateOfBirth, String address, String phoneNumber, Boolean expectedResult){
+    public void saveUserTest(String email, String firstName, String lastName, LocalDate dateOfBirth, String address, String phoneNumber, Boolean expectedResult) {
         var user = new UserDTO();
         user.setEmail(email);
         user.setFirstName(firstName);
@@ -97,22 +99,15 @@ public class UserServiceTests {
     /**
      * updateFields function test
      *
-     * @param data - fields data
+     * @param data           - fields data
      * @param expectedResult - expected update result
      */
     @Transactional
     @ParameterizedTest
     @MethodSource("fieldsTestData")
     void updateFieldsTest(LinkedHashMap<String, Object> data, boolean expectedResult) {
-        var testUser = new User();
+        setUpTestUser();
         var updatedUser = new User();
-
-        testUser.setEmail("test_user@gmail.com");
-        testUser.setFirstName("test");
-        testUser.setLastName("user");
-        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
-
-        testUser = userRepository.save(testUser);
 
         try {
             if (data.containsKey("id")) {
@@ -131,7 +126,7 @@ public class UserServiceTests {
                 String value = String.valueOf(declaredField.get(updatedUser));
                 String expectedValue = String.valueOf(data.get(field));
 
-                assert(expectedValue.equals(value));
+                assert (expectedValue.equals(value));
             }
         } catch (Exception e) {
             if (expectedResult) {
@@ -141,7 +136,7 @@ public class UserServiceTests {
             e.printStackTrace();
         }
 
-        userRepository.delete(testUser);
+        deleteTestUser();
         userRepository.delete(updatedUser);
     }
 
@@ -177,12 +172,12 @@ public class UserServiceTests {
     /**
      * update function test
      *
-     * @param email - user email
-     * @param firstName - user first name
-     * @param lastName - user last name
-     * @param dateOfBirth - user DoB
-     * @param address - user address
-     * @param phoneNumber - user phone number
+     * @param email          - user email
+     * @param firstName      - user first name
+     * @param lastName       - user last name
+     * @param dateOfBirth    - user DoB
+     * @param address        - user address
+     * @param phoneNumber    - user phone number
      * @param expectedResult - user saved or not
      */
     @Transactional
@@ -199,14 +194,7 @@ public class UserServiceTests {
             "test_user1@gmail.com, test, user, 2007-01-01, address, 1234567890, false"
     })
     public void updateTest(String email, String firstName, String lastName, LocalDate dateOfBirth, String address, String phoneNumber, Boolean expectedResult) {
-        var testUser = new User();
-
-        testUser.setEmail("test_user@gmail.com");
-        testUser.setFirstName("test");
-        testUser.setLastName("user");
-        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
-
-        testUser = userRepository.save(testUser);
+        setUpTestUser();
 
         var user = new UserDTO();
         user.setId(testUser.getId());
@@ -226,7 +214,7 @@ public class UserServiceTests {
 
             userRepository.delete(userRepository.findUserByEmail(email).get());
         } catch (Exception e) {
-            userRepository.delete(testUser);
+            deleteTestUser();
             if (expectedResult) {
                 System.out.printf("Error in case: %s - %s - %s - %s - %s - %s",
                         email, firstName, lastName, dateOfBirth.toString(), address, phoneNumber);
@@ -243,7 +231,7 @@ public class UserServiceTests {
     /**
      * isAgeValid function test
      *
-     * @param date - date
+     * @param date           - date
      * @param expectedResult - valid or not
      */
     @ParameterizedTest
@@ -272,14 +260,7 @@ public class UserServiceTests {
             ", false"
     })
     public void isEmailNotExistTest(String email, Boolean expectedResult) {
-        var testUser = new User();
-
-        testUser.setEmail("test_user@gmail.com");
-        testUser.setFirstName("test");
-        testUser.setLastName("user");
-        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
-
-        testUser = userRepository.save(testUser);
+        setUpTestUser();
 
         try {
             userService.isEmailNotExist(email);
@@ -291,13 +272,13 @@ public class UserServiceTests {
             e.printStackTrace();
         }
 
-        userRepository.delete(testUser);
+        deleteTestUser();
     }
 
     /**
      * isDataValid function test
      *
-     * @param date - date
+     * @param date           - date
      * @param expectedResult - valid or not
      */
     @ParameterizedTest
@@ -323,16 +304,9 @@ public class UserServiceTests {
      */
     @Test
     public void deleteTest() {
-        var testUser = new User();
+        setUpTestUser();
 
-        testUser.setEmail("test_user@gmail.com");
-        testUser.setFirstName("test");
-        testUser.setLastName("user");
-        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
-
-        testUser = userRepository.save(testUser);
-
-        userService.delete(testUser.getId());
+        deleteTestUser();
 
         assert (userRepository.findUserByEmail(testUser.getEmail()).isEmpty());
     }
@@ -340,8 +314,8 @@ public class UserServiceTests {
     /**
      * getUsersByDates function test
      *
-     * @param from - from date
-     * @param to - to date
+     * @param from           - from date
+     * @param to             - to date
      * @param expectedResult - expected result
      */
     @ParameterizedTest
@@ -351,14 +325,7 @@ public class UserServiceTests {
             "2020-01-01, 2000-01-01, false"
     })
     public void getUsersByDatesTest(LocalDate from, LocalDate to, Boolean expectedResult) {
-        var testUser = new User();
-
-        testUser.setEmail("test_user@gmail.com");
-        testUser.setFirstName("test");
-        testUser.setLastName("user");
-        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
-
-        testUser = userRepository.save(testUser);
+        setUpTestUser();
 
         try {
             var result = userService.getUsersByDates(from, to);
@@ -372,6 +339,27 @@ public class UserServiceTests {
             e.printStackTrace();
         }
 
+        deleteTestUser();
+    }
+
+    /**
+     * set up the test user
+     */
+    private void setUpTestUser() {
+        testUser = new User();
+
+        testUser.setEmail("test_user@gmail.com");
+        testUser.setFirstName("test");
+        testUser.setLastName("user");
+        testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
+
+        testUser = userRepository.save(testUser);
+    }
+
+    /**
+     * remove the test user from db
+     */
+    private void deleteTestUser() {
         userRepository.delete(testUser);
     }
 }
