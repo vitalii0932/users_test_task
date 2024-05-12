@@ -60,7 +60,7 @@ public class UserServiceTests {
             "test_user@gmail.com, test, user, 2007-01-01, address, 1234567890, false"
     })
     public void saveUserTest(String email, String firstName, String lastName, LocalDate dateOfBirth, String address, String phoneNumber, Boolean expectedResult){
-        var user = new User();
+        var user = new UserDTO();
         user.setEmail(email);
         user.setFirstName(firstName);
         user.setLastName(lastName);
@@ -70,6 +70,13 @@ public class UserServiceTests {
 
         try {
             userService.save(user);
+
+            if (!expectedResult) {
+                System.out.printf("Error in case: %s - %s - %s - %s - %s - %s",
+                        email, firstName, lastName, dateOfBirth.toString(), address, phoneNumber);
+                assert (false);
+            }
+
             assert (userRepository.findUserByEmail(email).isPresent());
 
             userRepository.delete(userRepository.findUserByEmail(email).get());
