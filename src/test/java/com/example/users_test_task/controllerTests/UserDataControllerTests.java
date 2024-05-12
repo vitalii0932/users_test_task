@@ -116,6 +116,8 @@ public class UserDataControllerTests {
     })
     public void updateUserTest(String email, String firstName, String lastName, LocalDate dateOfBirth,
                                String address, String phoneNumber, Boolean expectedResult) throws Exception {
+        setUpTestUser();
+
         MvcResult result = mockMvc.perform(post("/api/v1/users/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{"
@@ -250,8 +252,6 @@ public class UserDataControllerTests {
         String response = mvcResult.getResponse().getContentAsString();
 
         assert (expectedResult ? response.contains("deleted") : response.contains("Error"));
-
-        deleteTestUser();
     }
 
     /**
