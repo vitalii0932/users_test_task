@@ -9,9 +9,9 @@ import java.util.List;
 /**
  * validation exception class
  */
+@Getter
 @RequiredArgsConstructor
 public class ValidationException extends Exception {
 
-    @Getter
     private final List<Violation> violations;
 }

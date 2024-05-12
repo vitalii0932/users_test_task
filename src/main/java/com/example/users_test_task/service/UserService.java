@@ -35,7 +35,7 @@ public class UserService {
      * @param userDTO - user data
      * @return - saved user entity
      * @throws IllegalArgumentException if something is wrong
-     * @throws ValidationException if something is wrong on validation
+     * @throws ValidationException      if something is wrong on validation
      */
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Retryable(maxAttempts = 5)
@@ -53,7 +53,7 @@ public class UserService {
      * @param fields - fields to update
      * @return updated user entity from db
      * @throws IllegalArgumentException if something is wrong
-     * @throws ValidationException if something is wrong on validation
+     * @throws ValidationException      if something is wrong on validation
      */
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Retryable(maxAttempts = 5)
@@ -96,11 +96,11 @@ public class UserService {
      *
      * @param updatedUserDTO - user data to update
      * @throws IllegalArgumentException if something is wrong
-     * @throws ValidationException if something is wrong on validation
+     * @throws ValidationException      if something is wrong on validation
      */
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Retryable(maxAttempts = 5)
-    public User update(UserDTO updatedUserDTO) throws Exception{
+    public User update(UserDTO updatedUserDTO) throws Exception {
         var userToUpdate = userRepository.findById(updatedUserDTO.getId()).orElseThrow(
                 () -> new IllegalArgumentException("User not found exception")
         );
@@ -178,7 +178,7 @@ public class UserService {
      * get users by date of birth from @param from to @param to
      *
      * @param from - from date
-     * @param to - to date
+     * @param to   - to date
      * @return a list of users
      * @throws IllegalArgumentException if dates dont valid
      */
@@ -186,7 +186,7 @@ public class UserService {
     public List<User> getUsersByDates(LocalDate from, LocalDate to) throws IllegalArgumentException {
         isDataValid(from);
         isDataValid(to);
-        
+
         if (from.isAfter(to)) {
             throw new IllegalArgumentException("Error. Start date cannot be after end date");
         }

@@ -24,7 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * get users by date of birth from @param from to @param to
      *
      * @param from - from date
-     * @param to - to date
+     * @param to   - to date
      * @return a list of users
      */
     List<User> getUsersByDateOfBirthBetween(LocalDate from, LocalDate to);
