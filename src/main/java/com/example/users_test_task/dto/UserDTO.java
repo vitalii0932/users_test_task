@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
+/**
+ * class user to transfer user data
+ */
 @Data
 public class UserDTO {
     private Long id;

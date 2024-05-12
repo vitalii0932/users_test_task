@@ -2,14 +2,13 @@ package com.example.users_test_task.service;
 
 import com.example.users_test_task.exception.ValidationException;
 import com.example.users_test_task.model.User;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
 
 /**
  * service for validate user
@@ -21,7 +20,7 @@ public class ValidationService {
     private final Validator validator;
 
     /**
-     *  check does user is valid
+     * check does user is valid
      *
      * @param user - user entity
      * @return true if user is valid
@@ -41,8 +40,8 @@ public class ValidationService {
      * buildViolationsList function
      *
      * @param constraintViolations - constraintViolations from validation
+     * @param <T>                  - type
      * @return a list of Violation
-     * @param <T> - type
      */
     private <T> List<Violation> buildViolationsList(Set<ConstraintViolation<T>> constraintViolations) {
         return constraintViolations.stream()

@@ -121,7 +121,7 @@ public class UserDataController {
      * get users by date of birth from @param from to @param to
      *
      * @param from - from date
-     * @param to - to date
+     * @param to   - to date
      * @return a list of users
      */
     @Operation(summary = "Get a list of users between some dates")
@@ -133,7 +133,7 @@ public class UserDataController {
     public ResponseEntity<?> getUsersByDates(
             @RequestParam(name = "from") LocalDate from,
             @RequestParam(name = "to") LocalDate to
-            ) {
+    ) {
         try {
             return ResponseEntity.ok(userService.getUsersByDates(from, to));
         } catch (IllegalArgumentException e) {

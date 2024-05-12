@@ -9,6 +9,11 @@ import org.mapstruct.Mapper;
  */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    /**
+     * userDTO class to user class
+     *
+     * @param userDTO - userDTO class
+     * @return user class
+     */
     User toUser(UserDTO userDTO);
-    UserDTO toUSerDTO(User user);
 }
