@@ -165,7 +165,7 @@ public class UserService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Retryable(maxAttempts = 5)
     public void delete(Long id) throws RuntimeException {
-        if (userRepository.findById(id).isEmpty()) {
+        if (id == null || userRepository.findById(id).isEmpty()) {
             throw new RuntimeException("Error. User with this id doesnt exist");
         }
         userRepository.deleteById(id);
