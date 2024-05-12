@@ -28,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return a list of users
      */
     List<User> getUsersByDateOfBirthBetween(LocalDate from, LocalDate to);
+
+    void deleteAllByEmail(String email);
 }

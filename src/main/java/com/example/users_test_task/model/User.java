@@ -1,5 +1,6 @@
 package com.example.users_test_task.model;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -16,23 +17,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
+    @NotBlank(message = "Error. Email is required")
+    @Email(message = "Error. Email should be valid")
     @Column(unique = true)
     private String email;
 
-    @NotBlank(message = "First name is required")
+    @NotBlank(message = "Error. First name is required")
     private String firstName;
 
-    @NotBlank(message = "Last name is required")
+    @NotBlank(message = "Error. Last name is required")
     private String lastName;
 
-    @Past(message = "Date of birth should be in the past")
-    @NotNull(message = "Date of birth is required")
+    @Past(message = "Error. Date of birth should be in the past")
     private LocalDate dateOfBirth;
 
     private String address;
 
-    @Pattern(regexp="^(?:.{0}|\\d{10})$", message="Phone number should be empty or contain exactly 5 digits")
+    @Pattern(regexp="^(?:.{0}|\\d{10})$", message="Error. Phone number should be empty or contain exactly 10 digits")
+    @Nullable
     private String phoneNumber;
 }
